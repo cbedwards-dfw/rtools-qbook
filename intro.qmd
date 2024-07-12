@@ -1,0 +1,4 @@
+# Introduction
+
+The FRAM team at WDFW tackles a diverse array of analysis, data processing, simulation, and communication tasks. This book started as Collin Edwards' notes on various tools and packages. It has evolved to a more shareable form, and is intended to organize information about key R tools, especially packages, that streamline our work or extend our capabilities. This is a living document that will continue to grow as we identify or develop new tools.
+

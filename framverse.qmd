@@ -1,0 +1,127 @@
+# `FRAMverse` and related tools
+
+In addition to using many R tools and packages, the FRAM team has developed a series of R packages and repositories to streamline common tasks. Many of these can be found here: [https://github.com/FRAMverse]
+
+## framrsquared
+
+This package ([https://github.com/FRAMverse/framrsquared](https://github.com/FRAMverse/framrsquared)) provides R functions to interface with FRAM databases, including extracting tables, filtering data, plotting, and even (carefully) modifying the database. Ty Garber is the primary developer of this package.
+
+This package can be installed with devtools or the `pak` package:
+
+```r
+devtools::install_github("FRAMverse/framrsquared")
+
+# Alternatively 
+pak::pkg_install("FRAMverse/framrsquared")
+```
+
+The package home page has a good introduction to the package. The following is a brief
+summary.
+
+### Key functions:
+
+| Function                      | Use                                          |
+|:------------------------------|:---------------------------------------------|
+|`connect_fram_db()`            | create connection to database                |
+|`disconnect_fram_db()`         | disconnect from database                     |
+|`fetch_table()`                | extracts a given table from the database and returns it as an augmented tibble. |
+
+
+### Auditing functions:
+
+| Function                      | Use                                          |
+|:------------------------------|:---------------------------------------------|
+|`compare_fishery_inputs()`     | Compares the fishery inputs between two runs |
+|`compare_recruits()`           | compares the recruits between two runs       |
+|`compare_non_retention_inputs()`| Compares non-retention inputs  between two runs|
+|`compare_stock_fishery_rate_scalers()`| Compares stock fishery rate scalers   |
+|`compare_runs()`               | Generates a report to the console of each of the above|
+|`bkfram_checks()`              | Runs a series of checks when carrying out backwards fram |
+
+### Functions to recreate FRAM reports:
+
+| Function                      | Screen recreated                             |
+|:------------------------------|:---------------------------------------------|
+| `msf_mortalities()`           |  MSF number of mortalities                   |
+| `msf_encounters ()`           |  MSF number of encounters                    |
+| `msf_landed_catch()`          |  MSF number of landed catch                  |
+| `population_statistics()`     |  Populations statistics                      |
+| `stock_mortality()`           |  Fishery Mortality                           |
+
+### Filter functions:
+
+| Function             |  Filters to...              |
+|:---------------------|:----------------------------|
+|`filter_sport()`      | Sport fisheries             |
+|`filter_net()`        | Net fisheries               |
+|`filter_puget_sound()`| Puget Sound fisheries       |
+|`filter_coast()`      | Coastal fisheries           |
+|`filter_marine()`     | Marine fisheries            |
+|`filter_wa()`         | Washington state fisheries  |
+|`filter_bc()`         | Canadian fisheries          |
+|`filter_ak()`         | Alaska fisheries            |
+|`filter_or()`         | Oregon fisheries            |
+|`filter_ca()`         | California fisheries        |
+
+
+### Plotting functions:
+
+| Function                  |  Plots...                                |
+|:--------------------------|:-----------------------------------------|
+|`plot_stock_mortality()`   | Bar chart of top mortalities per fishery | 
+|`plot_stock_mortality_time_step()` | ... separated by timestep        |
+|`compare_inputs_chart()`   | Visualize changes in inputs between two runs (takes output of `compare_inputs()`|
+
+## TAMMsupport
+
+This package ([https://github.com/cbedwards-dfw/TAMMsupport](https://github.com/cbedwards-dfw/TAMMsupport)) provides R tools for interacting with TAMM files, including summarizing TAMMs, comparing TAMMs, and extracting key tables. Collin Edwards is the primary developer of this package.
+
+This package can be installed with devtools or the `pkg` package.
+
+```r
+devtools::install_github("cbedwards-dfw/TAMMsupport")
+
+# Alternatively 
+pak::pkg_install("cbedwards-dfw/TAMMsupport")
+```
+
+### Key functions:
+
+| Function                      | Use                                          |
+|:------------------------------|:---------------------------------------------|
+| `tamm_diff() `                | compares two tamm files and outputs an excel file with diff-like results |
+| `tamm_report()`               |summarizes key aspects of a single TAMM file in an html report, including tables and figures |
+| `tamm_compare()`              | Generates comparison of two or more TAMM files, using similar elements to the `tamm_report()` |
+
+
+### extracting and using data
+| Function                      | Use                                          |
+|:------------------------------|:---------------------------------------------|
+|`read_limiting_stock()`        | Reads the limiting stock complete sheet of the TAMM file and handles some simple filtering and formatting |
+|`clean_limiting_stock()`       | Like `read_limiting_stock()`, but filters to unmarked natural, removes AEQ entries, and pivots to longform. Useful for plotting|
+| `filter_tamm_wa_chin()`       | Filters data fram to washington fisheries based on a `fishery_id` column, using Chinook id numbers) |
+| `filter_tamm_wa_coho()`       | As `filter_tamm_wa_chin()`, but based on Coho id numbers|
+
+
+### Lookup tables
+
+To simplify translating between ID numbers and names, the `TAMMsupport` package includes dataframes with columns for stock or fishery id and corresponding names, as well as timestep designations.
+
+
+| dataframe name                | Useful for working with...                   |
+|:------------------------------|:---------------------------------------------|
+| `stock_chinook_fram`          | Chinook stock names and ids                  |
+| `stock_coho_fram`             | Coho stock names and ids                     |
+| `fishery_chinook_fram`        | Chinook fishery names and ids                |
+| `fishery_coho_fram`           | Coho fishery names and ids                   |
+| `timestep_chinook_fram`       | Chinook timesteps                            |
+| `timestep_coho_fram`          | Coho timesteps                               |
+
+
+## xldiff
+
+In developing the TAMMsupport package, we discovered there was no reliable R framework for comparing two excel sheets with identical structures but potentially different entries in individual cells. Collin Edwards developed the xldiff package [https://github.com/cbedwards-dfw/xldiff](https://github.com/cbedwards-dfw/xldiff) to remedy this. The package readme page has thorough documentation of the applications. This package is designed for quick and easy comparisons of individual sheets with `excel_diff` or as a framework for the development of other tools or packages (e.g., TAMMsupport). 
+
+## Snippets
+
+The snippets repository ([https://github.com/FRAMverse/snippets](https://github.com/FRAMverse/snippets)) is a storage place for miscellaneous code chunks that might be worth re-using. These include some command-line examples, VB macros, a range of R functions and example code, Quarto and Rmarkdown headers, and the template excel file for summarizing mortality from FRAM databases. The github home page includes an index for all functions and files (possibly excluding recent additions).

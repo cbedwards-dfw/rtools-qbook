@@ -1,0 +1,253 @@
+
+# Interactive interfaces
+
+**IMPORTANT:**  It appears that the quarto book format does not support interactive elements in the way that a normal .qmd compiled to html does. For that reason, the interactive elements in the following will not be displayed. For now, I leave this here as a useful reference - the code will still work outside of this book.
+
+```{r warning = FALSE, message=FALSE}
+library(tidyverse)
+library(gt) #tables and interactive tables
+library(plotly) # interactive plots
+library(trelliscopejs) # interactive version of facet_wrap
+library(gapminder) #data to demonstrate trelliscopejs
+library(gtExtras)
+```
+
+## Overview
+
+The FRAM team often needs to present relatively large sets of data to stake-holders who may be interested
+only in specific subsets of the data. By providing interactive interfaces, we add functionality to our presentations of the data as well as allowing users to customize the presentation to their needs.
+
+### Quick note on sharing interactive .html files
+
+The tools described below are easier to implement locally (running in Rstudio on your own computer and exploring in the viewer) than including in a compiled in a quarto or Rmarkdown .html file. By default quarto and Rmarkdown will create html files that rely on additional files present on your local machine. The compiled document will look good on *your* computer, but when you share it with others they won't be able to view the interactive figures or tables. This has definitely not been hugely frustrating. 
+
+We can fix this behavior by including two additional arguments in the YAML header of our Rmarkdown or quarto file: `embed-resources: true` as a sub-argument to `format: html`, and `standalone: true` as an independent argument. These setting produce a self-sufficient document that can be emailed or shared in Teams and viewed on other computers.  Here's the entire YAML header for a functional document.
+
+```
+title: "Presenting data interactively"
+author: "Collin Edwards"
+format: 
+  html:
+  embed-resources: true
+standalone: true
+```
+
+## Tables
+
+We can use the `gt` package to generate and customize tables. See https://gt.rstudio.com/articles/gt.html for an introduction to all the customization options. We'll use the built-in `mtcars` data for this example, adding in an explicit column for the car names (mtcars uses rownames for that), and we'll keep the table formatting to the default.
+
+
+### Non-interactive table
+
+We can quickly make a fairly pretty table with gt(). There are many options to improve readability and customize the figures, including adding headers, grouping sets of columns together with "spanner" labels, and adding footnotes. Footnotes in particular seem great, as we can use them to clarify column names within the table itself (rather than relying on users reading associated text in the main body of a document).
+
+```{r}
+dat <- mtcars |> 
+  mutate(car = rownames(mtcars)) |> 
+  relocate(car, .before = "mpg")
+dat |> 
+  gt()
+```
+
+### Interactive table
+
+The static table above works -- and we can make it prettier with additional options -- but the table is long and it can be clunky to compare individual cars or look for all the cars with the highest horsepower. Interactive tables provide solutions for this!
+  
+  We can make a `gt` table interactive by piping it into the `opt_interactive()` function. `opt_interactive()` has optional arguments to tweak what things are interactive (e.g., do we want to include filtering? Searching? etc). This tutorial provides a decent explanation: https://posit.co/blog/new-in-gt-0-9-0-interactive-tables/. Here is the default interactivity, which includes sorting by columns (click the column headers) and splitting into different pages.
+
+```{r}
+dat |> 
+  gt() |> 
+  opt_interactive()
+```
+
+### Interactive table, extra options
+
+Here we change the defaults on interactivity to add searching, filters, resizing columns, highlighting the row the mouse hovers over, and choosing the number of rows displayed at a time. 
+
+```{r}
+dat |> 
+  gt() |> 
+  opt_interactive(
+    use_search = TRUE,
+    use_filters = TRUE,
+    use_resizers = TRUE,
+    use_highlight = TRUE,
+    use_page_size_select = TRUE
+  )
+```
+
+## Figures
+
+`ggplot` figures can be made interactive by calling `ggplotly()` from the `plotly` library on a ggplot object. Again we will demonstrate this with mtcars, plotting the displacement against gross horsepower, coloring by the number of cylinders. 
+
+### Non-interactive figure
+
+We'll add some basic labeling and formatting, but this plot a relatively common example of using ggplot. For simplicity in the next step, we'll assign our plot to an object, and view that object.
+
+```{r}
+gp = ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl)))+
+  geom_point(size = 3)+
+  labs(col = "Cylinders")+
+  xlab("displacement (cubic in.)")+
+  ylab("horsepower")+
+  theme_bw(base_size = 14)
+gp
+```
+
+### Interactive figure
+
+While the static figure is fine, it can be hard to distinguish points that are close together, and we can't get precise values for individual points. We can make the figure interactive just by feeding it into `ggplotly`. This allows us to see details of points when we hover over them, as well as zoom in or out, and handle some other convenience features. 
+
+```{r}
+ggplotly(gp)
+```
+
+
+Plotly looks like it provides a rich suite of additional features for interactivity, but most of those features are beyond my current understanding. However, one incredibly powerful tool for clarifying figures is to change the hover-over tooltip to include additional information. For example, here we might want the hover to identify the individual cars.
+
+Conveniently, this is easy to do with ggplotly. First, we add additional arguments in our `aes` call using arbitrary names. These arguments should include any additional information we want included in the hover-over. Here, I add a `text` argument which holds the `car` information. By default, ggplotly includes *all* `aes` terms in the hover-over, even if they're not actually used in the plot otherwise.
+
+```{r}
+gp = ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl),
+                     text = car))+
+  geom_point(size = 3)+
+  labs(col = "Cylinders")+
+  xlab("displacement (cubic in.)")+
+  ylab("horsepower")+
+  theme_bw(base_size = 14)
+ggplotly(gp)
+```
+
+If we want the hover text to include only a subset of the terms in `aes` we can use the `tooltip` argument in `ggplotly`. We specify the hover text using the variable names in our `aes` call, *not* the variables of our dataframe.
+
+```{r}
+gp = ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl), text = car))+
+  geom_point(size = 3)+
+  labs(col = "Cylinders")+
+  xlab("displacement (cubic in.)")+
+  ylab("horsepower")+
+  theme_bw(base_size = 14)
+ggplotly(gp, tooltip = c("text", "x", "y"))
+```
+
+Note that there is a long-standing bug (still present as of 6/28/24) in which the order of text in the hover-over cannot be controlled with ggplotly as its supposed to be. There is a workaround described here: https://github.com/plotly/plotly.R/issues/849.
+
+## `trelliscopejs`: interactive facet_wrap
+
+We sometimes want to visualize plots for each fishery or each stock (or other situations where we want sub-plots representing different categories). The ggplot function `facet_wrap` is a fantastic tool for this kind of problem, but becomes less useful when the number of subplots reaches the point that they're hard to visualize on a single screen. We'll use the life expectancy data from the `gapminder` package to illustrate this.
+
+### Single plot
+
+As a starting point let's look at a single panel of our eventual plot: visualizing the US life expectancy through time. We'll add some basic labels and theming, but keep the figure simple.
+
+```{r}
+ggplot(gapminder |> filter(country == "United States"),
+       aes(x = year, y = lifeExp))+
+  geom_path()+
+  xlab("Year")+
+  ylab("Life expenctancy")+
+  ggtitle("USA")+
+  theme_bw(base_size = 14)
+
+```
+
+
+### `facet_wrap` working well
+
+What if we want to look at countries in continental North and Central America? One option is to use a single plot, with different colors for each country
+
+```{r}
+countries.interest = c("United States", "Canada", "Mexico",
+                       "Guatemala", "Honduras", "El Salvador",
+                       "Nicaragua", "Costa Rica", "Panama")
+ggplot(gapminder |> filter(country %in% countries.interest),
+       aes(x = year, y = lifeExp, col = country))+
+  geom_path()+
+  xlab("Year")+
+  ylab("Life expenctancy")+
+  ggtitle("North and Central America")+
+  theme_bw(base_size = 14)
+```
+
+This is nice for looking at overall trends, but it can be hard to focus on individual countries. We can use `facet_wrap` instead of coloring by country to break this up. 
+
+```{r}
+ggplot(gapminder |> filter(country %in% countries.interest),
+       aes(x = year, y = lifeExp))+
+  geom_path()+
+  facet_wrap(~ country)+
+  xlab("Year")+
+  ylab("Life expenctancy")+
+  ggtitle("North and Central America")+
+  theme_bw(base_size = 13)
+```
+
+Now we can easily focus on patterns of individual countries. For example, we can see the dip in El Salvador in the 70s and 80s, which may reflect conditions in the lead up to and during the Salvadoran Civil War (1979-1992). We could not easily distinguish details like this by overlaying colored lines.
+
+`facet_wrap` is often my go-to solution for plotting trends across fisheries or stock. 
+
+
+### `facet_wrap` breaking down
+
+But if we want to view facets for *every* country, we don't really have room.
+
+```{r}
+ggplot(gapminder,
+       aes(x = year, y = lifeExp))+
+  geom_path()+
+  facet_wrap(~ country)+
+  xlab("Year")+
+  ylab("Life expenctancy")+
+  ggtitle("All countries")+
+  theme_bw(base_size = 14)
+```
+
+One option is to break the full data set into meaningful chunks, and plot each one as a separate faceted figure. Here we might make a plot for each continent. However, there is another option!
+
+### `trelliscopejs` for interactivity
+
+With `trelliscopejs`, we can replace `facet_wrap` with `facet_trelliscope`. This takes a little while to run, but creates an incredibly flexible dashboard. In `grid` users can decide how many panels to show at once; in `sort` users can choose to sort by different criteria (for example, continent and then country). Perhaps most powerfully, users can use the `filter` section to specify individual countries to show, allowing users to make side-by-side comparisons of any set of countries they desire.
+
+```{r}
+ggplot(gapminder,
+       aes(x = year, y = lifeExp))+
+  geom_path()+
+  facet_trelliscope(~ country, path = '.', self_contained = TRUE)+
+  xlab("Year")+
+  ylab("Life expenctancy")+
+  ggtitle("")+
+  theme_bw(base_size = 14)
+```
+
+#### Including in a quarto or Rmarkdown file.
+
+Note that when embedding a trelliscopejs figure in quarto or rmarkdown, it appears that the default path argument (`NULL`) causes an error. Setting `path = '.'` fixes this (as I did above). 
+
+Additionally, the default settings lead to an html document that relies on additional files which are created in the same folder as the .html file. Sharing the html without the additional files means the trelliscope visualization will not work. To create a stand-alone html file, we need to add the argument `self_contained = TRUE` to our `facet_trelliscope` call.
+
+## BONUS: Sparkline and friends from `gtExtras`
+
+With some fiddling, we can actually include tiny figures within tables using the `gtExtras` package. Here we use that for the first gapminder. This is just a quick demo -- see the details here: https://jthomasmock.github.io/gtExtras/articles/plotting-with-gtExtras.html. Here we'll plot change in life expectancy over time and the general distribution of population size for each country within the period covered in the data.
+
+```{r}
+dat.gm = gapminder |> 
+  dplyr::arrange(year) |> 
+  group_by(continent, country) |> 
+  summarize(continent = continent[1],
+            country = country[1],
+            mean_gdp_percapita = mean(gdpPercap),
+            lifeExp = list(lifeExp),
+            dist_of_pop_size = list(pop)
+  )
+
+
+gt(head(dat.gm, 20)) |> 
+  gt_plt_sparkline(lifeExp) |> 
+  gt_plt_dist(dist_of_pop_size, type = "density") |> 
+  fmt_number(mean_gdp_percapita, decimals = 0) |> 
+  opt_interactive()
+```
+
+
+Note that the lineplot for lifeExp is just showing the change sequentially -- this would not work as intended if our data were not sorted by year, or if we had gaps in the years. There are a plethora of additional in-table plot options, including histograms and barplots.

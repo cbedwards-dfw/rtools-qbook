@@ -1,0 +1,152 @@
+```{r, message=FALSE, warning = FALSE}
+library(tidyverse)
+library(ggpp)
+library(ggrepel)
+```
+
+
+# Communication
+
+## Plotting
+
+### `ggpp`
+
+The [ggpp](https://cran.r-project.org/web/packages/ggpp/vignettes/grammar-extensions.html) package allows natural placement of text in ggplots based on position within frame instead of variable values.  This is an extension to the Grammar of Graphics (r-project.org). 
+
+The key function here is `geom_text_npc`, as in this example:
+
+```{r}
+df.lab = tibble(x = c("left", "right"), y = c("top", "bottom"), 
+                label = c("High power,\nlow displacement", "Low power, high displacement"))
+gp1 = ggplot(mtcars, aes (x = disp, y = hp, col = as.factor(cyl)))+
+         geom_point()+
+  theme_bw()+
+  geom_text_npc(data = df.lab, aes(npcx = x, npcy = y, label = label))
+gp1
+```
+
+The big advantage here is that the text is placed based on the *window* rather than x or y coordinates, so changinge the data or
+x or Y limits doesn't screw up text placement in relation to the window.
+
+```{r}
+gp1 + ylim(c(-100, NA))
+```
+
+
+When adding text directly (not from dataframe), `ggpp` overwrites the `annotate` function to support natural placement.
+
+```{r}
+gp1 + 
+  ylim(c(-100, NA))+
+  annotate(geom = "text_npc",
+           npcx = "left",
+           npcy = "bottom",
+           label = "New text")
+```
+
+
+
+`ggpp` is also great to inset tables (`geom_table()`), plots (`geom_plot()`) or images (`geom_grob()`) within each plot. 
+
+One way to inset a table with `geom_table()`, which takes a tibble in which one object is itself a list of the desired table contents. This feels a little fiddly to me, but probably scales up well when making many figures.
+
+
+```{r}
+df = mtcars |> 
+  group_by(cyl) |> 
+  summarize(n = n())
+df.inset = tibble(x = 400, y = 300, tb = list(df))
+ggplot(mtcars, aes (x = disp, y = hp, col = as.factor(cyl)))+
+         geom_point()+
+  geom_table(data = df.inset, aes(label = tb, x = x, y = y))+
+  theme_bw()
+```
+
+We can also control this more "naturally" with the overwritten `annotate` function -- no need to make a tibble containing a tibble or specify locations in absolute x and y coordinates.
+
+```{r}
+ggplot(mtcars, aes (x = disp, y = hp, col = as.factor(cyl)))+
+         geom_point()+
+  annotate("table_npc", npcx = "right", npcy = "top", label = df)+
+  theme_bw()
+```
+
+This same `annotate` approach can be used to add a plot inset into the figure. Make the inset plot and assign it to a variable, then use annotate with "plot_npc" like so:
+
+```{r}
+gp.inset = ggplot(mtcars, aes(x = mpg, y = hp))+
+  geom_point()+geom_smooth()+
+  theme_bw()
+ggplot(mtcars, aes (x = disp, y = hp, col = as.factor(cyl)))+
+         geom_point()+
+  annotate("table_npc", npcx = "right", npcy = "top", label = df)+
+  annotate("plot_npc", npcx = "left", npcy = "top", label = gp.inset)+
+  theme_bw()
+```
+
+
+
+### `ggrepel`
+
+The `ggrepel` package can be used to annotate data points using repultsion to minimize point overlap. 
+
+The problem:
+
+```{r}
+dat = mtcars |> 
+  head(10)
+dat$name = rownames(dat)
+ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl)))+
+  geom_point()+
+  geom_text(aes(label = name), col = 'black')
+```
+
+The solution: 
+
+```{r}
+ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl)))+
+  geom_point()+
+  geom_text_repel(aes(label = name), col = 'black')
+```
+
+
+
+### Custom labeling
+
+Sometimes we want to add content to ggplot in different layers, but have a legend that correctly represents these layers. The solution is to add the desired graphical setting (e.g., color, shape, etc) in the `aes()` call of each layer, and assign a character atomic to that argument. This will then distinguish the graphical setting just like when we assign a character vector column of the dataframe to the graphical argumnet. The `lab()` function can be used to give a meaningful legend title, and the standard modification functions (e.g. `scale_color_manual`) can be used to specify the colors (or shape, or size, etc) associated with each layer.
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  geom_smooth(aes(color = "loess"), method = "loess", se = FALSE)+
+  geom_smooth(aes(color = "gam"), method = "gam", se = FALSE)+
+  labs(color = "method")
+```
+
+
+
+## Interactives
+
+
+## Tables
+
+## Flowcharts
+
+Quarto has built-in support for generating flow charts and other diagrams from markdown. See here: [Quarto - Diagrams](https://quarto.org/docs/authoring/diagrams.html). This uses `mermaid` and/or `GraphViz`. For live building of these tools, see:
+
+- [Online FlowChart & Diagrams Editor - Mermaid Live Editor](https://mermaid.live/)
+- [Graphviz Online (dreampuf.github.io)](https://dreampuf.github.io/GraphvizOnline/)
+
+
+Here's the default chart of the mermaid live editor as an example
+
+```{mermaid}
+flowchart TD
+    A[Christmas] -->|Get money| B(Go shopping)
+    B --> C{Let me think}
+    C -->|One| D[Laptop]
+    C -->|Two| E[iPhone]
+    C -->|Three| F[fa:fa-car Car]
+
+```
+
