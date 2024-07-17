@@ -7,6 +7,20 @@ library(ggrepel)
 
 # Communication
 
+## Equations
+
+### Tooltips
+
+We can use `\texttip{}{}` and `\mathtip{}{}` to add hover text to equations in Quarto files when compiling to html. The first argument is the text in the equation, and the second is the hover.`\texttip` treats the hover text as *text*, while `\mathtip` renders the hover text as an equation.
+
+Examples (hover over $\pi$:
+
+for `$$a = \texttip{\pi}{it's about 3}r^2$$`:
+$$a = \texttip{\pi}{it's about 3}r^2$$
+
+for `$$a = \mathtip{\pi}{\approx\frac{22}{7}}r^2$$`:
+$$a = \mathtip{\pi}{\approx\frac{22}{7}}r^2$$
+
 ## Plotting
 
 ### `ggpp`
