@@ -11,15 +11,32 @@ library(ggrepel)
 
 ### Tooltips
 
+
+$\newcommand{\a}{\texttip{a}{area}}$
+$\newcommand{\r}{\mathtip{r}{r = \frac{d}{2}}}$
+
 We can use `\texttip{}{}` and `\mathtip{}{}` to add hover text to equations in Quarto files when compiling to html. The first argument is the text in the equation, and the second is the hover.`\texttip` treats the hover text as *text*, while `\mathtip` renders the hover text as an equation.
 
-Examples (hover over $\pi$:
 
-for `$$a = \texttip{\pi}{it's about 3}r^2$$`:
-$$a = \texttip{\pi}{it's about 3}r^2$$
+#### tooltip re-use
 
-for `$$a = \mathtip{\pi}{\approx\frac{22}{7}}r^2$$`:
-$$a = \mathtip{\pi}{\approx\frac{22}{7}}r^2$$
+*Thanks to John Best at WDFW for the following trick to re-use hover text across equations:*
+
+Define new commands to reuse variables (at the very top of your document, otherwise you may get blank lines where you don't want them):
+
+```
+$\newcommand{\a}{\texttip{a}{area}}$
+$\newcommand{\r}{\mathtip{r}{r = \frac{d}{2}}}$
+```
+
+Examples (hover over $\pi$, $a$, or $r$):
+
+for `$$\a = \texttip{\pi}{it's about 3}\r^2$$`:
+$$\a = \texttip{\pi}{it's about 3}\r^2$$
+
+for `$$\a = \mathtip{\pi}{\approx\frac{22}{7}}\r^2$$`:
+$$\a = \mathtip{\pi}{\approx\frac{22}{7}}\r^2$$
+**More generally, it appears that the LaTeX function `\newcommand` works in pandoc!**
 
 ## Plotting
 
