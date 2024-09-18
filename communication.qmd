@@ -161,6 +161,8 @@ ggplot(mpg, aes(displ, hwy)) +
 
 ## Tables
 
+I've been using `kable` and `kableExtras` in TAMMsupport, which works okay, but doesn't handle MS Word docs well. Preliminary experimentation with the `flextables` package suggests it's the best approach.
+
 ## Flowcharts
 
 Quarto has built-in support for generating flow charts and other diagrams from markdown. See here: [Quarto - Diagrams](https://quarto.org/docs/authoring/diagrams.html). This uses `mermaid` and/or `GraphViz`. For live building of these tools, see:
