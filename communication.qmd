@@ -116,7 +116,6 @@ ggplot(mtcars, aes (x = disp, y = hp, col = as.factor(cyl)))+
 ```
 
 
-
 ### `ggrepel`
 
 The `ggrepel` package can be used to annotate data points using repultsion to minimize point overlap. 
@@ -138,6 +137,31 @@ The solution:
 ggplot(dat, aes(x = disp, y = hp, col = as.factor(cyl)))+
   geom_point()+
   geom_text_repel(aes(label = name), col = 'black')
+```
+
+### Misc
+
+#### `forecats::reorder`
+
+`forecats::reorder` re-orders a factor based on another column. This can streamline
+custom ordering of plots.
+
+```{r}
+library(tidyverse)
+
+dat = mtcars |> 
+  mutate(car = rownames(mtcars))
+
+ggplot(dat, aes(x = car, y = hp))+
+  geom_col()+
+  coord_flip()+
+  ggtitle("default ordering")
+
+ggplot(dat, aes(x = reorder(car, hp), y = hp))+
+  geom_col()+
+  coord_flip()+
+  ggtitle("using reorder")
+  
 ```
 
 

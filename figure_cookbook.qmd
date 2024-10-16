@@ -2,24 +2,3 @@
 
 ## Misc
 
-`forecats::reorder` re-orders a factor based on another column. This can streamline
-custom ordering of plots.
-
-```{r}
-library(tidyverse)
-
-dat = mtcars |> 
-  mutate(car = rownames(mtcars))
-
-ggplot(dat, aes(x = car, y = hp))+
-  geom_col()+
-  coord_flip()+
-  ggtitle("default ordering")
-
-ggplot(dat, aes(x = reorder(car, hp), y = hp))+
-  geom_col()+
-  coord_flip()+
-  ggtitle("using reorder")
-  
-```
-
