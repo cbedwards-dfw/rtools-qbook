@@ -1,1 +1,52 @@
 # Data processing
+
+## Understanding the data
+
+`skimr::skim()` provides a nice, fast summary of a dataframe. 
+
+```{r}
+library(tidyverse)
+skimr::skim(mtcars)
+```
+
+We can develop our own variants on `skimr::skim()` like so:
+
+```{r}
+my_skim = skimr::skim_with(
+  numeric = skimr::sfl(
+    p0 = NULL,
+    min = ~ min(.x, na.rm = T),
+    p100 = NULL,
+    max = ~ max(.x, na.rm = T),
+    p25 = NULL,
+    p75 = NULL,
+    
+  )
+)
+
+my_skim(mtcars)
+```
+
+We can also create our own summaries entirely using `{gt}` and `{gtExtras}`. Note that this is much slower to run, and creates figures. It may be worth developing a version of this for .qmd summaries, though.
+
+```{r}
+sum_num = function(x){
+  data.frame(minimum = min(x, na.rm = T),
+             # quantile.1 = quantile(x, 0.1, na.rm = T),
+             median = median(x, na.rm = T),
+             maximum = max(x, na.rm = T),
+             # quantile.9 = quantile(x, 0.9, na.rm = T),
+             fraction.na = mean(is.na(x))
+  )
+}
+
+
+mtcars |> 
+  mutate(summary = map(data, sum_num)) |> 
+  unnest(summary) |> 
+  gt::gt() |> 
+  gtExtras::gt_plt_dist(data, same_limit = FALSE) |> 
+  gtExtras::gt_plt_bar(column = fraction.na, keep_column = TRUE, width = 35)
+
+```
+
