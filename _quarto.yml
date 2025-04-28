@@ -12,6 +12,8 @@ book:
     - dataprocessing.qmd
     - communication.qmd
     - figure_cookbook.qmd
+    - specific_tricks.qmd
+    - statistics_tricks.qmd
     - dev_and_simulations.qmd
     - framverse.qmd
     - other_resources.qmd

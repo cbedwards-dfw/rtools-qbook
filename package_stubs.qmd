@@ -1,3 +1,9 @@
 ## Package stubs
 
 *Placeholder / storage for new content to add*
+
+- `prefixer` package and addin to simplify adding packages prefixes to functions. Useful for developing packages. https://github.com/dreamRs/prefixer
+- `styler` package and addin to streamline restyling code (e.g. converting from `=` assignment to `<-`)
+- `fmtr` contains the very useful `descriptions()` function for attaching fcolumn descriptions onto dataframes and tibbles. This seems like good practice for a lot of work, and a valuable addition to framrsquared!
+- `compareWith` addin: https://github.com/miraisolutions/compareWith?tab=readme-ov-file
+- `furrr` looks like a quick way to paralellize code that uses `map`: https://furrr.futureverse.org/

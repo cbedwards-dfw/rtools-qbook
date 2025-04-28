@@ -1,0 +1,25 @@
+# Statistics Tricks
+
+The following is a collection of tricks that have been useful when carrying out analyses.
+
+## recreating probability densities
+
+When working with `mgcv::gam` using the `nb` family, it is sometimes useful to extract theta. This can be pulled from the fitted gam, in `$family$getTheta()`. As a simple example, we can create data from a known negative binomial distribution, fit with a simple gam model, and then predict the frequency of observations in the original data:
+
+```{r}
+library(mgcv)
+dat = data.frame(obs = rnbinom(10000, size = 3, mu = 2))
+
+out.test= gam(obs ~ 1, method = "REML",
+               family = "nb",
+               data = dat)
+
+temp  <-  predict(out.test, newdata = dat, type = "response")
+cur.theta <- out.test$family$getTheta(TRUE)
+
+data.frame(count = 0:10, 
+           predicted = round(dnbinom(0:10, size = cur.theta, mu = temp[1]), 4),
+           observed = round(as.numeric(table(dat$obs)/nrow(dat))[1:11], 4)
+)
+```
+

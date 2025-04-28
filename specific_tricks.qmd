@@ -1,0 +1,30 @@
+# Individual useful tricks
+
+- `zoo::na.locf(super)` is useful for handling super-headers in excel; for any NA, it fills in with the most recent non-NA. E.g., `zoo::na.locf("Aggregate", NA, NA, NA, "Stillaguamish", NA, NA, NA, "Snohomish", NA, NA, NA, "TOTAL")`
+- `seq_along()` is great for making iterators of a vector I need.
+- `tibble::row_id_to_column()` is a great way to add unique identifier #s to rows of a tibble or dataframe.
+- `clipr`!
+- `dput` for turning R object into code to generate that object
+- for toggleable optional quarto sections, see https://quarto.org/docs/authoring/conditional.html#matching-against-metadata
+
+- `readr::read_delim(reard::clipboard())` reads in a selected chunk of excel as a tibble.
+
+
+## Case matching with functions for supereasy categorization
+
+```{r}
+#Ty: i just figured out you can put a functiong in case_match.
+#Easy timestep mapping:
+   group_by(ts = case_match(lubridate::month(date),
+
+                           1:4 ~ 1,
+
+                           5:6 ~ 2,
+
+                           7:9 ~ 3,
+
+                           10:12 ~ 4
+
+                           ))
+```
+

@@ -1,1 +1,36 @@
 # Development tools and simulation support
+
+## Give package a website:
+
+`usethis::use_pkgdown_github_pages()`
+
+## adding .data and .env to package
+
+To streamline translating tidyverse code into package-friendly forms:
+
+`use_import_from("rlang", ".data")`
+`use_import_from("rlang", ".env")`
+
+## Using variables to populate names in dplyr operations like mutate
+
+https://stackoverflow.com/questions/26003574/use-dynamic-name-for-new-column-variable-in-dplyr
+
+## input checking
+
+`rlang::arg_match` is super helpful for checking string inputs against a list of possible strings. Example in fetch_table of framrsquared `table_name <- rlang::arg_match(table_name, all_tables)`
+
+## Package-izing code
+
+Dplyr pipelines do not translate readily into packages, because the masking and tidyselect behavior are not encourage
+in package dev, resulting in "undefined global variable" notes in `devtools::check()`. Depending on the function used, the variables either need
+to be prefixed with `.data$` or surrounded in quotes
+
+### `Var` --> `"Var"`
+group_by, select, relocate
+
+### `Var` --> `.data$Var`
+
+mutate, 
+
+**Update**: It looks like the new way to handle data masking is with `{{}}`. See: https://rlang.r-lib.org/reference/topic-data-mask.html  and also maybe https://rlang.r-lib.org/reference/topic-quosure.html
+
